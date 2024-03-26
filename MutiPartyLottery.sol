@@ -112,11 +112,11 @@ contract Lottery is CommitReveal{
         player_choice[msg.sender] = val;
     }
 
-    function checkWinner() public payable onlyOwner{
+    function checkWinner() public payable{
         // stage 3 check winner and pay but we need owner to fire transaction
 
-        require(checkState() == 3, "This is not FindWinner(3) stage");
-
+        require(checkState() == 3, "This is not FindWinner(3) stage or Someone already fire transaction and game is finish");
+        
         // check valid player and XOR choice before hash and mod
         uint Valid_player_num = 0;
         uint XOR_choice = 0;
@@ -145,7 +145,7 @@ contract Lottery is CommitReveal{
                         WinnerAddress = player_index[i];
                     }
                     else{
-                        Valid_winner_index += 1;
+                        Valid_player_index += 1;
                     }
                 }
             }
@@ -154,8 +154,10 @@ contract Lottery is CommitReveal{
         // payment Part
         address payable ownerAddress = payable(owner);
         address payable winnerAddress = payable(WinnerAddress);
+        address payable winnerCheckerAdress = payable(msg.sender);
 
-        ownerAddress.transfer((reward_pool * 2) / 100);
+        winnerCheckerAdress.transfer((reward_pool * 1) / 100);
+        ownerAddress.transfer((reward_pool * 1) / 100);
         winnerAddress.transfer((reward_pool * 98) / 100);
 
         // the reset game will not lead us to stage 4 if stage 3 execute succesfully (it reset to stage 0)
